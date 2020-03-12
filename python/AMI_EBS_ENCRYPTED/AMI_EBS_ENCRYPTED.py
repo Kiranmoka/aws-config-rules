@@ -17,7 +17,7 @@ Rule Name:
   AMI_EBS_ENCRYPTED
 
 Description:
-  Check EBS backed AMI are encrypted.
+  Check EBS-backed AMI are encrypted.
 
 Rationale:
   Encrypting on EBS ensure that no data is written on disk in clear text.
@@ -26,10 +26,10 @@ Indicative Severity:
   Medium
 
 Trigger:
-  Configuration Change on AWS::EC2::Instance
+  Periodic
 
 Reports on:
-  AWS::EC2::Instance
+  AWS::::Account
 
 Scenarios:
   Scenario: 1
@@ -44,7 +44,7 @@ Scenarios:
 
 
 from rdklib import Evaluator, Evaluation, ConfigRule, ComplianceType
-DEFAULT_RESOURCE_TYPE = 'AWS::EC2::Volume'
+DEFAULT_RESOURCE_TYPE = 'AWS::::Account'
 
 class AMI_EBS_ENCRYPTED(ConfigRule):
 
@@ -53,14 +53,15 @@ class AMI_EBS_ENCRYPTED(ConfigRule):
         evaluations = []
         amis = ec2_client.describe_images(Owners=["self"])
 
-        for ami in amis['Images']:
-            block_devices = ami['BlockDeviceMappings']
+        for ami in amis.get('Images'):
+            block_devices = ami.get('BlockDeviceMappings')
             for block_device in block_devices:
-                if block_device['Ebs']['Encrypted']:
+                ebs = block_device.get('Ebs')
+                if ebs and ebs['Encrypted']:
                     evaluations.append(
                         Evaluation(
                             ComplianceType.COMPLIANT,
-                            ami['ImageId'],
+                            ami.get('ImageId'),
                             DEFAULT_RESOURCE_TYPE
                         )
                     )
@@ -68,7 +69,7 @@ class AMI_EBS_ENCRYPTED(ConfigRule):
                     evaluations.append(
                         Evaluation(
                             ComplianceType.NON_COMPLIANT,
-                            ami['ImageId'],
+                            ami.get('ImageId'),
                             DEFAULT_RESOURCE_TYPE
                         )
                     )

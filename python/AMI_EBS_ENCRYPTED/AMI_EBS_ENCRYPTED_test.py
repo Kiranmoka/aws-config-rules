@@ -21,7 +21,7 @@ import rdklibtest
 ##############
 
 # Define the default resource to report to Config Rules
-RESOURCE_TYPE = 'AWS::EC2::Volume'
+RESOURCE_TYPE = 'AWS::::Account'
 
 #############
 # Main Code #
@@ -47,15 +47,9 @@ class ComplianceTest(unittest.TestCase):
         "Images": [
             {
                 "ImageId": "ami-0112c52e7ca89ee2e",
-                "State": "available",
                 "BlockDeviceMappings": [
                     {
-                        "DeviceName": "/dev/xvda",
                         "Ebs": {
-                            "SnapshotId": "snap-0d78c2a6eb35811af",
-                            "DeleteOnTermination": "True",
-                            "VolumeType": "gp2",
-                            "VolumeSize": 8,
                             "Encrypted": False
                         }
                     }
@@ -68,15 +62,10 @@ class ComplianceTest(unittest.TestCase):
         "Images": [
             {
                 "ImageId": "ami-08d7261cad6c06507",
-                "State": "available",
                 "BlockDeviceMappings": [
                     {
-                        "DeviceName": "/dev/sdb",
                         "Ebs": {
-                            "Encrypted": True,
-                            "DeleteOnTermination": "False",
-                            "VolumeType": "gp2",
-                            "VolumeSize": 8
+                            "Encrypted": True
                         }
                     }
                 ]
@@ -91,7 +80,6 @@ class ComplianceTest(unittest.TestCase):
         resp_expected = [
             Evaluation(ComplianceType.COMPLIANT, "ami-08d7261cad6c06507", RESOURCE_TYPE)
         ]
-
         rdklibtest.assert_successful_evaluation(self, response, resp_expected, 1)
 
     def test_non_compliant_ami(self):
@@ -100,5 +88,4 @@ class ComplianceTest(unittest.TestCase):
         resp_expected = [
             Evaluation(ComplianceType.NON_COMPLIANT, "ami-0112c52e7ca89ee2e", RESOURCE_TYPE)
         ]
-
         rdklibtest.assert_successful_evaluation(self, response, resp_expected, 1)
